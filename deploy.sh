@@ -67,26 +67,25 @@ S3BucketName=${1}
 ProfileName=${2:-default}
 
 #Stack Deploy Parameters
-StackName="ec2-scheduler"
-DefaultTimeZone="Australia/Melbourne"
-RDSSupport="Yes"
+StackName="stack-ec2-scheduler"
+DefaultTimeZone="America/Sao_Paulo"
+RDSSupport="No"
 Schedule="5minutes" 
-#Regions='ap-southeast-2 ap-southeast-1'
-Regions="ap-southeast-2"
+Regions="us-east-1 sa-east-1"
 
 # End of Customzation 
 
 rm -f *.zip
 
-cd code
+mkdir code_deploy
+cp code/* code_deploy/
+cd code_deploy
 
-# boto3 library provided in lambda does not support rds.start_db_instance and rds.stop_db_instance (in July 20, 2017)
 pip install boto3 -t .
 pip install pytz -t .
 
 zip -r -9 ../ec2-scheduler.zip *
-
-aws s3 cp ../ec2*.zip s3://${S3BucketName}
+aws s3 cp ../ec2-scheduler.zip s3://${S3BucketName}
 
 cd ..
 
@@ -100,10 +99,10 @@ set -e
 
 if [ ${#StackStatus} -eq 0 ]
 then
-    echo "Please ignore the Validation Error messagege above. Create CloudFormation stack ${StackName} ..."
+    echo "Please ignore the Validation Error message above. Create CloudFormation stack ${StackName} ..."
 
     aws cloudformation create-stack --stack-name ${StackName} \
-		  --template-body file://cform/ec2-scheduler.template \
+		--template-body file://cform/ec2-scheduler.template \
     	--capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM \
     	--profile ${ProfileName} \
     	--parameters \
@@ -123,7 +122,7 @@ then
 
     aws cloudformation create-change-set --stack-name ${StackName} \
           --template-body file://cform/ec2-scheduler.template \
-    	    --profile ${ProfileName} \
+    	  --profile ${ProfileName} \
           --change-set-name ${ChangeSetName} \
           --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM \
     	    --parameters \
@@ -135,7 +134,7 @@ then
     sleep 10
 
     ChangeSetStatus=$(aws cloudformation describe-change-set  \
-    	  --profile ${ProfileName} \
+    	--profile ${ProfileName} \
         --change-set-name ${ChangeSetName} \
         --stack-name ${StackName} \
         --query Status \
@@ -147,7 +146,7 @@ then
         sleep 30
         ChangeSetStatus=$(aws cloudformation describe-change-set \
             --change-set-name ${ChangeSetName} \
-    	      --profile ${ProfileName} \
+    	    --profile ${ProfileName} \
             --stack-name ${StackName} \
             --query Status \
             --output text)

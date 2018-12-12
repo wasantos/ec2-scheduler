@@ -22,17 +22,17 @@
         "DefaultStopTime": {
             "Description": "Default Start Time (DefaultTimeZone, utc by default, 24-hour format)",
             "Type": "String",
-            "Default": "1800"
+            "Default": "2000"
         },
         "DefaultDaysActive": {
             "Description": "Enter 'all', 'weekdays', or any combination of days ('mon', 'tue', 'wed', 'thu', 'fri', 'sat', or 'sun') comma separated",
             "Type": "String",
-            "Default": "all"
+            "Default": "weekdays"
         },
         "DefaultTimeZone": {
             "Description": "Enter 'utc', 'Australia/Sydney','Etc/GMT+10', or any timezone supported by pytz",
             "Type": "String",
-            "Default": "utc"
+            "Default": "America/Sao_Paulo"
         },
         "CustomTagName": {
             "Description": "Custom Tag Name",
@@ -47,7 +47,7 @@
         "SendAnonymousData": {
             "Description": "Send anonymous data to AWS",
             "Type": "String",
-            "Default": "Yes",
+            "Default": "No",
             "AllowedValues": [
                 "Yes",
                 "No"
@@ -65,7 +65,7 @@
         "Regions": {
             "Description": "AWS regions to query, all means all AWS regions, or separate  multiple regions by space",
             "Type": "String",
-            "Default": "all"
+            "Default": "us-east-1 sa-east-1"
         },
         "RDSSupport": {
             "Description": "Support RDS instances",
@@ -211,8 +211,8 @@
                     "S3Key": "ec2-scheduler.zip"
                 },
                 "Runtime": "python2.7",
-                "Timeout": "300",
-                "MemorySize": 256
+                "Timeout": "250",
+                "MemorySize": 128
             }
         },
         "SolutionHelperRole": {

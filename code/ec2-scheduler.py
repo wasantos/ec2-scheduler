@@ -11,7 +11,6 @@
 #  and limitations under the License.                                                                                #
 ######################################################################################################################
 
-
 import boto3
 import datetime
 import json
@@ -25,12 +24,11 @@ import re
 # Import pytz to support local timezone
 import pytz
 
-
 #Default startTime, stopTime, TimeZone
-defaultStartTime = 'none'
-defaultStopTime = 'none'
-defaultTimeZone = 'utc'
-defaultDaysActive = 'all'
+defaultStartTime = '0830'
+defaultStopTime = '1930'
+defaultTimeZone = 'America/Sao_Paulo'
+defaultDaysActive = 'weekdays'
 
 def putCloudWatchMetric(region, instance_id, instance_state):
     
@@ -119,13 +117,6 @@ def scheduler_action(tagValue):
         daysActive = ptag[3].lower()
 
     now = datetime.datetime.now(tz).strftime("%H%M")
-
-    if  datetime.datetime.now(tz).strftime("%H") != '00':
-        nowMax = datetime.datetime.now(tz) - datetime.timedelta(minutes=59)
-        nowMax = nowMax.strftime("%H%M")
-    else:
-        nowMax = "0000"
-
     nowDay = datetime.datetime.now(tz).strftime("%a").lower()
     nowDate = int(datetime.datetime.now(tz).strftime("%d"))
 
@@ -166,10 +157,9 @@ def scheduler_action(tagValue):
                 if (weekday.lower() == nowDay) and ( nowDate >= (int(nthweek) * 7 - 6)) and (nowDate <= (int(nthweek) * 7)):
                    isActiveDay = True
 
-    if startTime >= str(nowMax) and startTime <= str(now) and isActiveDay == True and isValidTimeZone == True:
+    if startTime <= str(now) and stopTime > str(now) and isActiveDay == True and isValidTimeZone == True:
         Action = "START"
-
-    if stopTime >= str(nowMax) and stopTime <= str(now) and isActiveDay == True and isValidTimeZone == True:
+    else:
         Action = "STOP"
 
     return Action
@@ -416,21 +406,18 @@ def lambda_handler(event, context):
 if  __name__ =='__main__':
     event = {
         "DefaultStartTime": "0800",
-        "DefaultStopTime": "1800",
-        "UUID": "27b0ceaa-2162-47d0-9ed1-e7e76f22cbba",
-        "SolutionName": "EC2Scheduler",
-        "DefaultDaysActive": "all",
-        "Regions": "ap-southeast-2",
-        "DefaultTimeZone": "Australia/Melbourne",
-        "RDSSupport": "Yes",
+        "DefaultStopTime": "2000",
+        "UUID": "91454db0-3c0f-4651-bc29-c65a25fad085",
+        "SolutionName": "Sched-EC2",
+        "DefaultDaysActive": "weekdays",
+        "Regions": "us-east-1",
+        "DefaultTimeZone": "America/Sao_Paulo",
         "SendAnonymousData": "No",
-        "CustomTagName": "scheduler:ec2-startstop",
-        "CustomRDSTagName": "scheduler:rds-startstop",
-        "CloudWatchMetrics": "Enabled"
+        "CustomTagName": "sched:ec2",
+        "CloudWatchMetrics": "Disabled"
     }
 
     context = None
-
     lambda_handler(event = event, context = context)
 
 #EOF
